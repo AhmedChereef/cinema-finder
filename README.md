@@ -1,4 +1,4 @@
-# spotCinema / elCinema Unofficial API — v0.5.1
+# spotCinema / elCinema Unofficial API — v0.6.0
 
 > Spot the right movie, time, place, and price.
 
@@ -21,7 +21,7 @@ Open <http://localhost:3000> to try the Arabic playground.
 For responsible requests, edit `.env` and replace the default user agent with a real contact email:
 
 ```env
-ELCINEMA_USER_AGENT=SpotCinemaPrototype/0.5.1 (+you@example.com)
+ELCINEMA_USER_AGENT=SpotCinemaPrototype/0.6.0 (+you@example.com)
 ```
 
 ## Build the fast daily snapshot
@@ -100,6 +100,8 @@ Location names are returned in Arabic and English from elCinema's own cinema dir
 The **Use my location** button calculates distances inside the browser and filters cinemas within a 5, 10, 25, 50, or 100 km radius. The visitor's coordinates are not stored in the snapshot or sent to this application. Browser geolocation requires HTTPS or localhost; GitHub Pages already uses HTTPS.
 
 The **Next showtime from now** button checks the current time in Cairo and searches every cached day for the selected movie. It respects the active city, area, or nearby-radius filter, then shows the cinema, ticket price, experience, distance, and the two next alternatives.
+
+The v0.6.0 mobile-first interface adds a searchable poster gallery, date chips, a clearer location card, a highlighted best-showing recommendation, and compact cinema cards while preserving every collected showtime and ticket price.
 
 Each cinema returns a `pricesStatus` value:
 

@@ -3,122 +3,327 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0a0b10" />
     <meta name="description" content="Spot the right movie, time, place, and price." />
-    <title>spotCinema — Movie Showtimes and Prices</title>
+    <title>spotCinema — اختار فيلمك وسينمتك وميعادك</title>
     <style>
-      :root { color-scheme: dark; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+      :root {
+        color-scheme: dark;
+        font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+        --bg: #090a0f;
+        --surface: #12141c;
+        --surface-raised: #181b25;
+        --surface-soft: #1e212c;
+        --border: #292d3a;
+        --border-strong: #3a4050;
+        --text: #fafafa;
+        --muted: #9ca3b3;
+        --primary: #f52c54;
+        --primary-hover: #ff466a;
+        --primary-soft: #35141f;
+        --gold: #f3c568;
+        --success: #72e7ae;
+        --blue: #8cc0ff;
+        --shadow: 0 22px 70px rgb(0 0 0 / 32%);
+        --radius-lg: 24px;
+        --radius-md: 16px;
+        --radius-sm: 11px;
+      }
+
       * { box-sizing: border-box; }
-      body { margin: 0; background: #090b10; color: #f7f7f8; }
-      main { width: min(1100px, 92%); margin: 40px auto; }
-      h1 { margin: 0 0 8px; font-size: clamp(30px, 5vw, 48px); }
-      h2, h3 { margin-top: 0; }
-      .muted { color: #a9afbd; }
-      .status { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; }
-      .badge { padding: 6px 10px; border-radius: 999px; background: #17271f; color: #74e7ad; font-size: 13px; }
-      .panel { padding: 22px; margin-top: 24px; background: #141820; border: 1px solid #252b38; border-radius: 18px; }
-      .form { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
-      label { display: grid; gap: 7px; font-size: 14px; color: #c7cbd4; }
-      select, button { width: 100%; min-height: 46px; padding: 10px 12px; border-radius: 10px; border: 1px solid #333b4c; background: #0d1016; color: white; font: inherit; }
-      button { width: auto; padding-inline: 24px; cursor: pointer; background: #e31b45; border-color: #e31b45; font-weight: 700; }
-      button.secondary { min-height: auto; padding: 6px 12px; background: transparent; border-color: #3a4355; font-size: 13px; }
-      button:disabled { opacity: .6; cursor: wait; }
-      .area-picker { position: relative; }
-      .area-toggle { width: 100%; padding-inline: 12px; overflow: hidden; background: #0d1016; border-color: #333b4c; text-align: right; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
-      .area-menu { position: absolute; z-index: 10; top: calc(100% + 6px); right: 0; left: 0; max-height: 280px; padding: 8px; overflow-y: auto; background: #10141c; border: 1px solid #3a4355; border-radius: 12px; box-shadow: 0 16px 36px #0009; }
-      .area-option { display: flex; grid-template-columns: none; align-items: center; gap: 9px; padding: 9px 8px; border-radius: 8px; color: #f7f7f8; cursor: pointer; }
-      .area-option:hover { background: #202635; }
-      .area-option input { width: 17px; height: 17px; margin: 0; accent-color: #e31b45; }
-      .quick-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; }
-      .quick-tools button { width: auto; background: #f2c46f; border-color: #f2c46f; color: #171109; }
-      .current-time { padding: 7px 10px; border-radius: 999px; background: #202635; color: #f7f7f8; white-space: nowrap; }
-      .location-tools { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #252b38; }
-      .location-tools button { width: auto; }
-      .radius-label { display: flex; align-items: center; gap: 8px; }
-      .radius-label select { width: auto; min-width: 110px; }
-      .location-status { flex: 1 1 260px; align-self: center; }
-      #progress { margin-top: 14px; }
-      .summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
-      .movie-heading { display: flex; align-items: center; gap: 16px; min-width: 0; }
-      .poster { width: 82px; aspect-ratio: 2 / 3; flex: 0 0 auto; border-radius: 10px; object-fit: cover; background: #202635; box-shadow: 0 7px 20px #0007; }
-      .movie-heading h2 { margin-bottom: 5px; }
-      .cinema { padding: 18px 0; border-bottom: 1px solid #2a303d; }
-      .cinema:last-child { border-bottom: 0; }
-      .cinema-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px; }
-      .cinema-place { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
-      .location { color: #f2c46f; }
-      .distance { padding: 4px 9px; border-radius: 999px; background: #182a3d; color: #84b9ff; font-size: 13px; white-space: nowrap; }
-      .recommendation { margin-top: 18px; padding: 20px; border: 1px solid #6d572b; border-radius: 14px; background: linear-gradient(135deg, #2a2315, #181b22); }
-      .recommendation-label { color: #f2c46f; font-weight: 700; }
-      .recommendation-time { margin: 8px 0 4px; font-size: clamp(24px, 4vw, 34px); font-weight: 800; }
-      .recommendation-details { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; }
-      .alternatives { margin: 18px 0 0; padding-top: 16px; border-top: 1px solid #2a303d; }
-      .alternative { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; padding: 10px 0; }
-      .times { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-      .time { padding: 9px 11px; border-radius: 9px; background: #202635; direction: ltr; }
-      .price { color: #74e7ad; font-weight: 700; }
-      .unavailable { color: #a9afbd; }
-      a { color: #84b9ff; }
-      pre { white-space: pre-wrap; direction: ltr; text-align: left; font-size: 12px; overflow: auto; }
+      html { scroll-behavior: smooth; }
+      body { margin: 0; background: var(--bg); color: var(--text); }
+      button, input, select { font: inherit; }
+      button, a { -webkit-tap-highlight-color: transparent; }
+      button { color: inherit; }
+      a { color: inherit; }
       [hidden] { display: none !important; }
-      @media (max-width: 900px) { .form { grid-template-columns: 1fr 1fr; } .form button { width: 100%; } }
-      @media (max-width: 560px) { main { margin-top: 24px; } .panel { padding: 16px; } .form { grid-template-columns: 1fr; } .quick-tools > button, .location-tools > button, .radius-label, .radius-label select { width: 100%; } }
+
+      body::before {
+        position: fixed;
+        z-index: -1;
+        inset: 0;
+        content: "";
+        background:
+          radial-gradient(circle at 10% -10%, rgb(245 44 84 / 17%), transparent 32rem),
+          radial-gradient(circle at 100% 34%, rgb(71 97 173 / 10%), transparent 28rem);
+        pointer-events: none;
+      }
+
+      .shell { width: min(1160px, calc(100% - 40px)); margin-inline: auto; }
+      .site-header { border-bottom: 1px solid rgb(255 255 255 / 7%); background: rgb(9 10 15 / 82%); backdrop-filter: blur(18px); }
+      .header-inner { min-height: 82px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+      .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+      .brand-mark { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: var(--primary); box-shadow: 0 8px 28px rgb(245 44 84 / 30%); }
+      .brand-mark svg { width: 22px; height: 22px; }
+      .brand-name { display: block; font-size: 20px; font-weight: 800; letter-spacing: -.4px; direction: ltr; }
+      .brand-tagline { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; direction: ltr; }
+      .header-status { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
+      .status-copy { display: grid; justify-items: end; gap: 2px; min-width: 0; }
+      .status-copy .meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 440px; }
+
+      main { padding: 54px 0 110px; }
+      .hero { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); gap: 22px; align-items: stretch; }
+      .hero-copy { padding: 12px 0; }
+      .eyebrow { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 16px; color: var(--gold); font-size: 13px; font-weight: 800; }
+      h1, h2, h3, p { margin-top: 0; }
+      h1 { max-width: 720px; margin-bottom: 16px; font-size: clamp(38px, 6vw, 68px); line-height: 1.07; letter-spacing: -2.6px; }
+      h2 { margin-bottom: 0; font-size: clamp(23px, 3vw, 31px); letter-spacing: -.8px; }
+      h3 { margin-bottom: 0; font-size: 18px; }
+      .lead { max-width: 670px; margin-bottom: 28px; color: #c3c7d1; font-size: clamp(16px, 2vw, 19px); line-height: 1.8; }
+      .search-label { display: grid; gap: 9px; max-width: 680px; color: #d7d9e0; font-size: 14px; font-weight: 700; }
+      .search-wrap { position: relative; display: block; }
+      .search-icon { position: absolute; right: 16px; top: 50%; width: 19px; height: 19px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+      .search-input { width: 100%; min-height: 56px; padding: 13px 50px 13px 16px; border: 1px solid var(--border-strong); border-radius: 15px; outline: none; background: var(--surface); color: var(--text); transition: border-color .2s, box-shadow .2s; }
+      .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgb(245 44 84 / 13%); }
+      .search-input::placeholder { color: #747b8c; }
+
+      .card { border: 1px solid var(--border); border-radius: var(--radius-lg); background: linear-gradient(145deg, rgb(255 255 255 / 3%), transparent 45%), var(--surface); box-shadow: var(--shadow); }
+      .location-card { padding: 24px; display: grid; align-content: space-between; gap: 22px; }
+      .clock { display: grid; gap: 6px; }
+      .clock-label { color: var(--muted); font-size: 13px; }
+      .clock-time { font-size: 32px; font-weight: 800; direction: rtl; }
+      .privacy { color: var(--muted); font-size: 12px; line-height: 1.65; }
+      .location-actions { display: grid; gap: 9px; }
+
+      .btn { min-height: 46px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 17px; border: 1px solid var(--border-strong); border-radius: 12px; background: var(--surface-soft); color: var(--text); text-decoration: none; font-weight: 800; cursor: pointer; transition: transform .16s, background .16s, border-color .16s; }
+      .btn:hover { border-color: #52596c; background: #252936; }
+      .btn:active { transform: translateY(1px); }
+      .btn:focus-visible { outline: 3px solid rgb(245 44 84 / 28%); outline-offset: 2px; }
+      .btn:disabled { opacity: .52; cursor: wait; }
+      .btn-primary { border-color: var(--primary); background: var(--primary); }
+      .btn-primary:hover { border-color: var(--primary-hover); background: var(--primary-hover); }
+      .btn-ghost { min-height: 38px; padding: 7px 11px; border-color: transparent; background: transparent; color: var(--muted); font-size: 13px; }
+      .btn-ghost:hover { background: var(--surface-soft); color: var(--text); }
+      .btn-small { min-height: 38px; padding: 7px 12px; font-size: 13px; }
+      .btn-wide { width: 100%; }
+
+      .section { margin-top: 52px; scroll-margin-top: 18px; }
+      .section-heading { margin-bottom: 18px; display: flex; align-items: end; justify-content: space-between; gap: 18px; }
+      .heading-copy { display: grid; gap: 7px; }
+      .meta, .muted { color: var(--muted); }
+      .meta { font-size: 13px; }
+      .badge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: fit-content; padding: 6px 10px; border-radius: 999px; background: var(--surface-soft); color: #d9dce4; font-size: 12px; font-weight: 800; }
+      .badge-live { background: #153026; color: var(--success); }
+      .badge-gold { background: #322812; color: var(--gold); }
+      .badge-blue { background: #17283b; color: var(--blue); }
+
+      .movie-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+      .movie-card { min-width: 0; padding: 0; border: 0; border-radius: 16px; outline: none; background: transparent; text-align: right; cursor: pointer; }
+      .movie-poster-wrap { position: relative; aspect-ratio: 2 / 3; overflow: hidden; border: 2px solid transparent; border-radius: 15px; background: var(--surface-soft); box-shadow: 0 12px 28px rgb(0 0 0 / 25%); transition: border-color .18s, transform .18s, box-shadow .18s; }
+      .movie-poster-wrap::after { position: absolute; inset: auto 0 0; height: 42%; content: ""; background: linear-gradient(transparent, rgb(0 0 0 / 72%)); }
+      .movie-card:hover .movie-poster-wrap { transform: translateY(-3px); box-shadow: 0 18px 36px rgb(0 0 0 / 36%); }
+      .movie-card.is-selected .movie-poster-wrap { border-color: var(--primary); box-shadow: 0 0 0 4px rgb(245 44 84 / 14%), 0 18px 36px rgb(0 0 0 / 36%); }
+      .movie-poster { width: 100%; height: 100%; display: block; object-fit: cover; }
+      .poster-fallback { width: 100%; height: 100%; display: grid; place-items: center; padding: 18px; background: linear-gradient(145deg, #262a3b, #141620); color: #d6d9e2; text-align: center; line-height: 1.7; }
+      .selected-tick { position: absolute; z-index: 2; left: 9px; bottom: 9px; width: 26px; height: 26px; display: none; place-items: center; border: 2px solid white; border-radius: 50%; background: var(--primary); font-size: 14px; }
+      .movie-card.is-selected .selected-tick { display: grid; }
+      .movie-title { display: -webkit-box; min-height: 44px; margin-top: 10px; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; color: #e8e9ee; font-size: 14px; font-weight: 800; line-height: 1.55; }
+      .empty-search { grid-column: 1 / -1; padding: 32px 20px; border: 1px dashed var(--border-strong); border-radius: var(--radius-md); color: var(--muted); text-align: center; }
+
+      .filter-card { padding: 24px; }
+      .date-row { display: flex; gap: 9px; padding-bottom: 4px; overflow-x: auto; scrollbar-width: thin; }
+      .date-chip { flex: 0 0 auto; min-height: 45px; padding-inline: 18px; border-radius: 999px; }
+      .date-chip.is-selected { border-color: var(--primary); background: var(--primary); }
+      .filters { display: grid; grid-template-columns: 1fr 1fr .7fr; gap: 13px; margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--border); align-items: end; }
+      .field { display: grid; gap: 8px; color: #cfd2db; font-size: 13px; font-weight: 700; }
+      .control { width: 100%; min-height: 48px; padding: 10px 13px; border: 1px solid var(--border-strong); border-radius: 12px; outline: none; background: #0d0f15; color: var(--text); }
+      .control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgb(245 44 84 / 11%); }
+      .control:disabled { opacity: .5; }
+      .area-picker { position: relative; display: block; }
+      .area-toggle { justify-content: space-between; width: 100%; padding-inline: 13px; overflow: hidden; background: #0d0f15; text-align: right; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+      .area-menu { position: absolute; z-index: 20; top: calc(100% + 7px); right: 0; left: 0; max-height: 290px; padding: 8px; overflow-y: auto; border: 1px solid var(--border-strong); border-radius: 13px; background: #11141c; box-shadow: var(--shadow); }
+      .area-option { display: flex; align-items: center; gap: 9px; padding: 10px 9px; border-radius: 9px; color: #f1f2f5; cursor: pointer; }
+      .area-option:hover { background: var(--surface-soft); }
+      .area-option input { width: 17px; height: 17px; margin: 0; accent-color: var(--primary); }
+      .filter-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 20px; }
+      .filter-actions .btn-primary { min-width: 230px; }
+      .progress { flex: 1 1 260px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+      .results-section { display: grid; gap: 18px; }
+      .result-movie { display: flex; align-items: center; gap: 14px; min-width: 0; }
+      .result-poster { width: 60px; aspect-ratio: 2 / 3; flex: 0 0 auto; border-radius: 9px; object-fit: cover; background: var(--surface-soft); }
+      .result-movie-title { margin-bottom: 4px; font-size: clamp(22px, 3vw, 30px); }
+      .recommendation { position: relative; overflow: hidden; padding: clamp(22px, 4vw, 34px); border-color: #654f24; background: linear-gradient(135deg, #241e12 0%, #151821 55%, #18151a 100%); }
+      .recommendation::before { position: absolute; top: -100px; left: -100px; width: 260px; height: 260px; content: ""; border-radius: 50%; background: rgb(245 44 84 / 11%); filter: blur(10px); }
+      .recommendation-top { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      .recommendation-main { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; margin-top: 22px; align-items: end; }
+      .recommendation-copy { display: grid; gap: 10px; }
+      .showing-time { font-size: clamp(27px, 4vw, 42px); font-weight: 900; line-height: 1.25; }
+      .cinema-name { font-size: clamp(20px, 3vw, 27px); }
+      .detail-row { display: flex; flex-wrap: wrap; align-items: center; gap: 9px 16px; color: #d7dae2; }
+      .price { color: var(--success); font-weight: 900; }
+      .unavailable { color: var(--muted); }
+      .alternatives { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .alternative { padding: 17px; display: grid; gap: 8px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+      .alternative-head { display: flex; justify-content: space-between; gap: 12px; }
+      .alternative-time { font-weight: 900; }
+      .results-toolbar { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+      .cinema-list { display: grid; gap: 13px; }
+      .cinema-card { padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+      .cinema-head { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+      .cinema-copy { display: grid; gap: 7px; min-width: 0; }
+      .cinema-place { display: flex; flex-wrap: wrap; gap: 7px; color: var(--gold); font-size: 13px; }
+      .cinema-address { color: var(--muted); font-size: 13px; line-height: 1.55; }
+      .times { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 17px; }
+      .time { padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-soft); color: #e9ebef; font-size: 13px; direction: ltr; }
+      .time .price { margin-inline-start: 4px; }
+      .cinema-footer { display: flex; align-items: center; justify-content: flex-end; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+      .empty-state { padding: 34px 22px; border: 1px dashed var(--border-strong); border-radius: var(--radius-md); background: var(--surface); color: var(--muted); text-align: center; line-height: 1.8; }
+
+      .mobile-nav { position: fixed; z-index: 30; right: 50%; bottom: 12px; display: none; width: min(420px, calc(100% - 24px)); grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 7px; transform: translateX(50%); border: 1px solid var(--border); border-radius: 17px; background: rgb(18 20 28 / 92%); box-shadow: 0 18px 44px rgb(0 0 0 / 46%); backdrop-filter: blur(20px); }
+      .mobile-nav a { display: grid; justify-items: center; gap: 3px; padding: 7px 4px; border-radius: 11px; color: var(--muted); text-decoration: none; font-size: 11px; font-weight: 800; }
+      .mobile-nav a:first-child { background: var(--primary-soft); color: #ff7792; }
+      .nav-icon { font-size: 17px; }
+
+      @media (max-width: 980px) {
+        .movie-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .filters { grid-template-columns: 1fr 1fr; }
+        .filters .field:last-child { grid-column: 1 / -1; }
+      }
+
+      @media (max-width: 720px) {
+        .shell { width: min(100% - 28px, 620px); }
+        .site-header { position: static; }
+        .header-inner { min-height: 70px; }
+        .brand-tagline, .status-copy .meta { display: none; }
+        .header-status { gap: 3px; }
+        main { padding-top: 36px; }
+        .hero { grid-template-columns: 1fr; }
+        .hero-copy { padding-top: 0; }
+        h1 { letter-spacing: -1.8px; }
+        .location-card { grid-template-columns: 1fr; padding: 19px; }
+        .clock-time { font-size: 27px; }
+        .section { margin-top: 42px; }
+        .section-heading { align-items: start; }
+        .movie-grid { display: flex; gap: 12px; margin-inline: -14px; padding: 3px 14px 12px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; }
+        .movie-grid::-webkit-scrollbar { display: none; }
+        .movie-card { flex: 0 0 132px; scroll-snap-align: start; }
+        .movie-title { min-height: 42px; }
+        .filter-card { padding: 18px; }
+        .filters { grid-template-columns: 1fr; }
+        .filters .field:last-child { grid-column: auto; }
+        .filter-actions { display: grid; }
+        .filter-actions .btn-primary { min-width: 0; }
+        .progress { grid-row: 3; }
+        .recommendation-main { grid-template-columns: 1fr; }
+        .recommendation-main .btn { width: 100%; }
+        .alternatives { grid-template-columns: 1fr; }
+        .results-toolbar { align-items: start; }
+        .cinema-head { display: grid; }
+        .cinema-head > .badge { justify-self: start; }
+        .mobile-nav { display: grid; }
+      }
+
+      @media (max-width: 430px) {
+        .shell { width: calc(100% - 24px); }
+        .brand-mark { width: 38px; height: 38px; }
+        .brand-name { font-size: 18px; }
+        .header-status #stats { display: none; }
+        h1 { font-size: 39px; }
+        .lead { font-size: 15px; }
+        .movie-card { flex-basis: 116px; }
+        .result-poster { width: 52px; }
+        .recommendation-top, .results-toolbar { align-items: start; }
+        .recommendation-top { flex-direction: column; }
+        .alternative-head { display: grid; }
+      }
     </style>
   </head>
   <body>
-    <main>
-      <h1>spotCinema</h1>
-      <div class="muted" dir="ltr">Spot the right movie, time, place, and price.</div>
-      <div class="status">
-        <span id="freshness" class="badge">جاري تحميل آخر نسخة…</span>
-        <span id="stats" class="muted"></span>
-        <button id="reload" class="secondary" type="button">تحقق من نسخة أحدث</button>
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="brand" href="#top" aria-label="spotCinema — الصفحة الرئيسية">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          </span>
+          <span><span class="brand-name">spotCinema</span><span class="brand-tagline">Spot the right movie, time, place, and price.</span></span>
+        </a>
+        <div class="header-status">
+          <span class="status-copy"><span id="freshness" class="badge badge-live">جاري تحميل آخر نسخة…</span><span id="stats" class="meta"></span></span>
+          <button id="reload" class="btn btn-ghost" type="button" aria-label="التحقق من نسخة أحدث">↻ تحديث</button>
+        </div>
       </div>
+    </header>
 
-      <section class="panel">
-        <div class="form">
-          <label>الفيلم<select id="movie" disabled><option>جاري تحميل الأفلام…</option></select></label>
-          <label>التاريخ<select id="date" disabled><option>—</option></select></label>
-          <label>المحافظة / المدينة<select id="city" disabled><option value="">كل المحافظات والمدن</option></select></label>
-          <label>المناطق
+    <main id="top" class="shell">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <span class="eyebrow">● كل الأفلام والمواعيد والأسعار في مكان واحد</span>
+          <h1 id="hero-title">فيلمك، في أقرب سينما وبأنسب سعر.</h1>
+          <p class="lead">اختار الفيلم واليوم والمناطق اللي تناسبك، أو استخدم موقعك وهنقولك أقرب حفلة متاحة من دلوقتي.</p>
+          <label class="search-label" for="movie-search">إيه الفيلم اللي عاوز تشوفه؟
+            <span class="search-wrap">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+              <input id="movie-search" class="search-input" type="search" placeholder="ابحث باسم الفيلم بالعربي أو الإنجليزي" autocomplete="off" disabled />
+            </span>
+          </label>
+        </div>
+
+        <aside class="card location-card" aria-label="الوقت والموقع">
+          <div class="clock"><span class="clock-label">الوقت الآن في مصر</span><span id="current-time" class="clock-time">—</span><span class="privacy">موقعك بيُستخدم داخل المتصفح فقط لترتيب السينمات، ومش بنحفظه أو نرسله لأي مكان.</span></div>
+          <div class="location-actions">
+            <button id="locate" class="btn btn-primary btn-wide" type="button" disabled>⌖ استخدم موقعي</button>
+            <button id="clear-location" class="btn btn-small btn-wide" type="button" hidden>إلغاء استخدام الموقع</button>
+            <span id="location-status" class="meta">تقدر كمان تختار المحافظة والمناطق يدويًا.</span>
+          </div>
+        </aside>
+      </section>
+
+      <section id="movies" class="section" aria-labelledby="movies-title">
+        <div class="section-heading">
+          <div class="heading-copy"><span class="eyebrow">دلوقتي في السينمات</span><h2 id="movies-title">يعرض حاليًا</h2></div>
+          <span id="movie-count" class="meta">جاري تحميل الأفلام…</span>
+        </div>
+        <div id="movie-grid" class="movie-grid" aria-live="polite"></div>
+      </section>
+
+      <section id="filters" class="section card filter-card" aria-labelledby="filters-title">
+        <div class="section-heading">
+          <div class="heading-copy"><span class="eyebrow">خطوة واحدة للنتيجة</span><h2 id="filters-title">اختار اليوم والمكان</h2></div>
+          <span class="meta">تقدر تختار أكتر من منطقة</span>
+        </div>
+        <div id="date-row" class="date-row" aria-label="الأيام المتاحة"></div>
+        <div class="filters">
+          <label class="field">المحافظة / المدينة
+            <select id="city" class="control" disabled><option value="">كل المحافظات والمدن</option></select>
+          </label>
+          <label class="field">المناطق
             <span class="area-picker">
-              <button id="area-toggle" class="area-toggle" type="button" disabled>كل المناطق</button>
+              <button id="area-toggle" class="btn area-toggle" type="button" disabled><span>كل المناطق</span><span aria-hidden="true">⌄</span></button>
               <span id="area-menu" class="area-menu" hidden></span>
             </span>
           </label>
-          <button id="search" disabled>اعرض المواعيد</button>
-        </div>
-        <div class="quick-tools">
-          <button id="nearest" type="button" disabled>⏱️ أقرب ميعاد من دلوقتي</button>
-          <span id="current-time" class="current-time">الوقت الآن في مصر: —</span>
-          <span class="muted">يبحث في كل الأيام المتاحة للفيلم.</span>
-        </div>
-        <div class="location-tools">
-          <button id="locate" type="button" disabled>📍 استخدم موقعي</button>
-          <label class="radius-label">في نطاق
-            <select id="radius" disabled>
-              <option value="5">5 كم</option>
-              <option value="10">10 كم</option>
-              <option value="25" selected>25 كم</option>
-              <option value="50">50 كم</option>
-              <option value="100">100 كم</option>
+          <label class="field">نطاق الموقع
+            <select id="radius" class="control" disabled>
+              <option value="5">5 كم</option><option value="10">10 كم</option><option value="25" selected>25 كم</option><option value="50">50 كم</option><option value="100">100 كم</option>
             </select>
           </label>
-          <button id="clear-location" class="secondary" type="button" hidden>إلغاء الموقع</button>
-          <span id="location-status" class="muted location-status">موقعك يُستخدم داخل المتصفح فقط ولا يتم حفظه.</span>
         </div>
-        <div id="progress" class="muted"></div>
+        <div class="filter-actions">
+          <button id="nearest" class="btn btn-primary" type="button" disabled>⏱ أقرب ميعاد من دلوقتي</button>
+          <button id="search" class="btn" type="button" disabled>اعرض كل مواعيد اليوم</button>
+          <span id="progress" class="progress"></span>
+        </div>
       </section>
 
-      <section id="results" class="panel" hidden></section>
-      <details class="panel"><summary>عرض بيانات النتيجة JSON</summary><pre id="json">—</pre></details>
+      <section id="results" class="section results-section" aria-live="polite" hidden></section>
     </main>
+
+    <nav class="mobile-nav" aria-label="التنقل الرئيسي">
+      <a href="#movies"><span class="nav-icon" aria-hidden="true">🎬</span><span>الأفلام</span></a>
+      <a href="#filters"><span class="nav-icon" aria-hidden="true">⌖</span><span>المكان والوقت</span></a>
+      <a href="#results"><span class="nav-icon" aria-hidden="true">🎟</span><span>النتائج</span></a>
+    </nav>
 
     <script type="module">
       import { findUpcomingShowings } from "./time-utils.js";
 
       const elements = {
-        movie: document.querySelector("#movie"),
-        date: document.querySelector("#date"),
+        movieSearch: document.querySelector("#movie-search"),
+        movieGrid: document.querySelector("#movie-grid"),
+        movieCount: document.querySelector("#movie-count"),
+        dateRow: document.querySelector("#date-row"),
         city: document.querySelector("#city"),
         areaToggle: document.querySelector("#area-toggle"),
         areaMenu: document.querySelector("#area-menu"),
@@ -134,44 +339,49 @@
         stats: document.querySelector("#stats"),
         progress: document.querySelector("#progress"),
         results: document.querySelector("#results"),
-        json: document.querySelector("#json"),
       };
+
       let snapshot = null;
+      let selectedMovieId = null;
+      let selectedDate = null;
       let userLocation = null;
       const selectedAreaIds = new Set();
 
       const escapeHtml = (value) => String(value ?? "").replace(/[&<>\"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char]);
 
+      function cairoDateKey(date = new Date()) {
+        const parts = new Intl.DateTimeFormat("en", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "Africa/Cairo" }).formatToParts(date);
+        const value = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+        return `${value.year}-${value.month}-${value.day}`;
+      }
+
       function formatDate(value) {
-        return new Intl.DateTimeFormat("ar-EG", {
-          dateStyle: "full",
-          timeZone: "Africa/Cairo",
-        }).format(new Date(`${value}T12:00:00+03:00`));
+        return new Intl.DateTimeFormat("ar-EG", { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Cairo" }).format(new Date(`${value}T12:00:00Z`));
+      }
+
+      function dateLabel(value) {
+        const today = cairoDateKey();
+        const tomorrow = new Date(`${today}T12:00:00Z`);
+        tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+        if (value === today) return "اليوم";
+        if (value === tomorrow.toISOString().slice(0, 10)) return "بكرة";
+        return formatDate(value);
       }
 
       function formatUpdatedAt(value) {
-        return new Intl.DateTimeFormat("ar-EG", {
-          dateStyle: "medium",
-          timeStyle: "short",
-          timeZone: "Africa/Cairo",
-        }).format(new Date(value));
+        return new Intl.DateTimeFormat("ar-EG", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Cairo" }).format(new Date(value));
       }
 
       function updateCurrentTime() {
-        const time = new Intl.DateTimeFormat("ar-EG", {
-          hour: "numeric",
-          minute: "2-digit",
-          timeZone: "Africa/Cairo",
-        }).format(new Date());
-        elements.currentTime.textContent = `الوقت الآن في مصر: ${time}`;
+        elements.currentTime.textContent = new Intl.DateTimeFormat("ar-EG", { hour: "numeric", minute: "2-digit", timeZone: "Africa/Cairo" }).format(new Date());
       }
 
       function formatShowingDate(value) {
-        return new Intl.DateTimeFormat("ar-EG", {
-          dateStyle: "full",
-          timeStyle: "short",
-          timeZone: "Africa/Cairo",
-        }).format(new Date(value));
+        return new Intl.DateTimeFormat("ar-EG", { weekday: "long", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Africa/Cairo" }).format(new Date(value));
+      }
+
+      function formatShowingTime(value) {
+        return new Intl.DateTimeFormat("ar-EG", { hour: "numeric", minute: "2-digit", timeZone: "Africa/Cairo" }).format(new Date(value));
       }
 
       function formatWaitingTime(milliseconds) {
@@ -188,14 +398,12 @@
         const longitude = Number(cinema.coordinates?.longitude);
         if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
         if (latitude < 20 || latitude > 33 || longitude < 24 || longitude > 37) return null;
-
         const toRadians = (degrees) => degrees * Math.PI / 180;
         const latitudeDelta = toRadians(latitude - userLocation.latitude);
         const longitudeDelta = toRadians(longitude - userLocation.longitude);
         const startLatitude = toRadians(userLocation.latitude);
         const endLatitude = toRadians(latitude);
-        const haversine = Math.sin(latitudeDelta / 2) ** 2
-          + Math.cos(startLatitude) * Math.cos(endLatitude) * Math.sin(longitudeDelta / 2) ** 2;
+        const haversine = Math.sin(latitudeDelta / 2) ** 2 + Math.cos(startLatitude) * Math.cos(endLatitude) * Math.sin(longitudeDelta / 2) ** 2;
         return 6371 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
       }
 
@@ -204,119 +412,122 @@
         return `${new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 1 }).format(value)} كم`;
       }
 
+      function priceMarkup(showtime) {
+        return showtime.price != null
+          ? `<span class="price">${escapeHtml(showtime.price)} ${escapeHtml(showtime.currency || "EGP")}</span>`
+          : `<span class="unavailable">السعر غير متاح</span>`;
+      }
+
       function selectedMovie() {
-        return snapshot?.movies.find((item) => item.id === elements.movie.value);
+        return snapshot?.movies.find((item) => item.id === selectedMovieId);
+      }
+
+      function renderMovieCards() {
+        const query = elements.movieSearch.value.trim().toLocaleLowerCase("ar");
+        const movies = (snapshot?.movies || []).filter((movie) => [movie.title, movie.titleAr, movie.titleEn].filter(Boolean).some((title) => title.toLocaleLowerCase("ar").includes(query)));
+        elements.movieCount.textContent = query ? `${movies.length} نتيجة` : `${movies.length} فيلم`;
+        elements.movieGrid.innerHTML = movies.length ? movies.map((movie) => {
+          const title = movie.titleAr || movie.title || movie.titleEn;
+          const selected = movie.id === selectedMovieId;
+          const poster = movie.poster
+            ? `<img class="movie-poster" src="${escapeHtml(movie.poster)}" alt="بوستر ${escapeHtml(title)}" loading="lazy">`
+            : `<span class="poster-fallback">${escapeHtml(title)}</span>`;
+          return `<button class="movie-card${selected ? " is-selected" : ""}" type="button" data-movie-id="${escapeHtml(movie.id)}" aria-pressed="${selected}">
+            <span class="movie-poster-wrap">${poster}<span class="selected-tick" aria-hidden="true">✓</span></span>
+            <span class="movie-title">${escapeHtml(title)}</span>
+          </button>`;
+        }).join("") : `<div class="empty-search">مفيش فيلم مطابق للبحث. جرّب كتابة جزء من الاسم بالعربي أو الإنجليزي.</div>`;
       }
 
       function loadDates() {
         const movie = selectedMovie();
-        elements.date.innerHTML = (movie?.availableDates || [])
-          .map((value) => `<option value="${value}">${escapeHtml(formatDate(value))}</option>`)
-          .join("");
-        elements.date.disabled = !movie?.availableDates?.length;
+        const dates = movie?.availableDates || [];
+        if (!dates.includes(selectedDate)) selectedDate = dates[0] || null;
+        renderDateChips();
+      }
+
+      function renderDateChips() {
+        const dates = selectedMovie()?.availableDates || [];
+        elements.dateRow.innerHTML = dates.length ? dates.map((value) => `<button class="btn date-chip${value === selectedDate ? " is-selected" : ""}" type="button" data-date="${value}" aria-pressed="${value === selectedDate}">${escapeHtml(dateLabel(value))}</button>`).join("") : `<span class="meta">مفيش أيام متاحة للفيلم ده حاليًا.</span>`;
+        elements.search.disabled = !dates.length;
       }
 
       function loadAreas() {
         const areas = snapshot?.locations?.areasByCity?.[elements.city.value] || [];
         selectedAreaIds.clear();
-        elements.areaMenu.innerHTML = areas
-          .map((item) => `<label class="area-option"><input type="checkbox" value="${item.id}"><span>${escapeHtml(item.nameAr || item.nameEn)}</span></label>`)
-          .join("");
+        elements.areaMenu.innerHTML = areas.map((item) => `<label class="area-option"><input type="checkbox" value="${escapeHtml(item.id)}"><span>${escapeHtml(item.nameAr || item.nameEn)}</span></label>`).join("");
         elements.areaToggle.disabled = !elements.city.value || !areas.length;
         elements.areaMenu.hidden = true;
         updateAreaLabel();
       }
 
       function updateAreaLabel() {
-        const selectedNames = [...elements.areaMenu.querySelectorAll("input:checked")]
-          .map((input) => input.nextElementSibling.textContent);
-        elements.areaToggle.textContent = selectedNames.length
-          ? selectedNames.length === 1 ? selectedNames[0] : `${selectedNames.length} مناطق مختارة`
-          : "كل المناطق";
-      }
-
-      function renderTimes(showtimes) {
-        return showtimes.map((show) => {
-          const price = show.price != null
-            ? `<span class="price">${escapeHtml(show.price)} ${escapeHtml(show.currency || "EGP")}</span>`
-            : `<span class="unavailable">السعر غير متاح</span>`;
-          const experience = show.experience ? ` · ${escapeHtml(show.experience)}` : "";
-          return `<span class="time">${escapeHtml(show.time)} · ${price}${experience}</span>`;
-        }).join("");
+        const selectedNames = [...elements.areaMenu.querySelectorAll("input:checked")].map((input) => input.nextElementSibling.textContent);
+        const label = selectedNames.length ? selectedNames.length === 1 ? selectedNames[0] : `${selectedNames.length} مناطق مختارة` : "كل المناطق";
+        elements.areaToggle.querySelector("span").textContent = label;
       }
 
       function filteredCinemas(day) {
         const radiusKm = Number(elements.radius.value);
         const nearbyMode = Boolean(userLocation);
-        return (day?.cinemas || [])
-          .map((cinema) => ({ ...cinema, distanceKm: cinemaDistanceKm(cinema) }))
-          .filter((cinema) => {
-            if (nearbyMode) return cinema.distanceKm != null && cinema.distanceKm <= radiusKm;
-            const matchesCity = !elements.city.value || cinema.location?.city?.id === elements.city.value;
-            const matchesArea = !selectedAreaIds.size || selectedAreaIds.has(cinema.location?.area?.id);
-            return matchesCity && matchesArea;
-          });
+        return (day?.cinemas || []).map((cinema) => ({ ...cinema, distanceKm: cinemaDistanceKm(cinema) })).filter((cinema) => {
+          if (nearbyMode) return cinema.distanceKm != null && cinema.distanceKm <= radiusKm;
+          const matchesCity = !elements.city.value || cinema.location?.city?.id === elements.city.value;
+          const matchesArea = !selectedAreaIds.size || selectedAreaIds.has(cinema.location?.area?.id);
+          return matchesCity && matchesArea;
+        });
+      }
+
+      function movieHeading(movie, subtitle) {
+        const title = movie.titleAr || movie.title || movie.titleEn;
+        return `<div class="result-movie">${movie.poster ? `<img class="result-poster" src="${escapeHtml(movie.poster)}" alt="بوستر ${escapeHtml(title)}">` : ""}<div><h2 class="result-movie-title">${escapeHtml(title)}</h2><span class="meta">${escapeHtml(subtitle)}</span></div></div>`;
+      }
+
+      function renderTimes(showtimes) {
+        return showtimes.map((show) => `<span class="time">${escapeHtml(show.time)} · ${priceMarkup(show)}${show.experience ? ` · ${escapeHtml(show.experience)}` : ""}</span>`).join("");
       }
 
       function renderResults() {
         const movie = selectedMovie();
-        const day = movie?.dates.find((item) => item.date === elements.date.value);
+        const day = movie?.dates.find((item) => item.date === selectedDate);
+        elements.results.hidden = false;
         if (!movie || !day) {
-          elements.results.hidden = false;
-          elements.results.textContent = "لا توجد مواعيد متاحة لهذا الاختيار.";
+          elements.results.innerHTML = `<div class="empty-state">لا توجد مواعيد متاحة لهذا الاختيار.</div>`;
           return;
         }
 
         const radiusKm = Number(elements.radius.value);
         const nearbyMode = Boolean(userLocation);
-        const cinemas = filteredCinemas(day)
-          .sort((first, second) => nearbyMode ? first.distanceKm - second.distanceKm : 0);
-
-        elements.results.hidden = false;
+        const cinemas = filteredCinemas(day).sort((first, second) => nearbyMode ? first.distanceKm - second.distanceKm : 0);
         elements.results.innerHTML = `
-          <div class="summary">
-            <div class="movie-heading">
-              ${movie.poster ? `<img class="poster" src="${escapeHtml(movie.poster)}" alt="بوستر ${escapeHtml(movie.title)}" loading="lazy">` : ""}
-              <div><h2>${escapeHtml(movie.title)}</h2><span class="muted">${escapeHtml(formatDate(day.date))}</span></div>
-            </div>
-            <span class="muted">${cinemas.length} سينما${nearbyMode ? ` قريبة منك في نطاق ${escapeHtml(radiusKm)} كم` : ""}</span>
+          <div class="results-toolbar">
+            ${movieHeading(movie, formatDate(day.date))}
+            <span class="badge${nearbyMode ? " badge-blue" : ""}">${cinemas.length} سينما${nearbyMode ? ` · نطاق ${escapeHtml(radiusKm)} كم` : ""}</span>
           </div>
-          <div>${cinemas.length ? cinemas.map((cinema) => {
+          ${cinemas.length ? `<div class="cinema-list">${cinemas.map((cinema) => {
             const locationText = [cinema.location?.area?.name, cinema.location?.city?.name].filter(Boolean).join("، ") || "الموقع غير مصنف";
-            return `<article class="cinema">
-              <div class="cinema-head"><h3>${escapeHtml(cinema.theater || cinema.name)}</h3><span class="cinema-place"><span class="location">${escapeHtml(locationText)}</span>${cinema.distanceKm != null ? `<span class="distance">📍 ${escapeHtml(formatDistance(cinema.distanceKm))}</span>` : ""}</span></div>
-              ${cinema.address ? `<div class="muted">${escapeHtml(cinema.address)}</div>` : ""}
+            return `<article class="cinema-card">
+              <div class="cinema-head">
+                <div class="cinema-copy"><h3>${escapeHtml(cinema.theater || cinema.name)}</h3><span class="cinema-place">⌖ ${escapeHtml(locationText)}</span>${cinema.address ? `<span class="cinema-address">${escapeHtml(cinema.address)}</span>` : ""}</div>
+                ${cinema.distanceKm != null ? `<span class="badge badge-blue">${escapeHtml(formatDistance(cinema.distanceKm))}</span>` : ""}
+              </div>
               <div class="times">${renderTimes(cinema.showtimes)}</div>
-              ${cinema.bookingUrl ? `<p><a href="${escapeHtml(cinema.bookingUrl)}" target="_blank" rel="noreferrer">الحجز على elCinema</a></p>` : ""}
+              ${cinema.bookingUrl ? `<div class="cinema-footer"><a class="btn btn-small" href="${escapeHtml(cinema.bookingUrl)}" target="_blank" rel="noreferrer">🎟 الحجز على elCinema</a></div>` : ""}
             </article>`;
-          }).join("") : `<p class="muted">${nearbyMode ? `لا توجد سينمات تعرض الفيلم داخل نطاق ${escapeHtml(radiusKm)} كم. جرّب نطاقًا أكبر.` : "لا توجد سينمات مطابقة للمكان المختار."}</p>`}</div>`;
+          }).join("")}</div>` : `<div class="empty-state">${nearbyMode ? `مفيش سينمات تعرض الفيلم داخل نطاق ${escapeHtml(radiusKm)} كم. جرّب نطاق أكبر.` : "مفيش سينمات مطابقة للمكان المختار. جرّب محافظة أو مناطق تانية."}</div>`}`;
 
-        const resultData = { movie: { id: movie.id, title: movie.title }, date: day.date, nearbyRadiusKm: nearbyMode ? radiusKm : null, cinemas };
-        elements.json.textContent = JSON.stringify(resultData, null, 2);
-        elements.progress.textContent = nearbyMode
-          ? `تم ترتيب ${cinemas.length} سينما من الأقرب للأبعد داخل نطاق ${radiusKm} كم.`
-          : `تم عرض ${cinemas.length} سينما فورًا من النسخة المحفوظة.`;
+        elements.progress.textContent = nearbyMode ? `رتبنا ${cinemas.length} سينما من الأقرب للأبعد.` : `عرضنا ${cinemas.length} سينما فورًا من النسخة المحفوظة.`;
       }
 
       function renderNearestShowing() {
         const movie = selectedMovie();
         const now = new Date();
         if (!movie) return;
-
         const filteredDays = movie.dates.map((day) => ({ ...day, cinemas: filteredCinemas(day) }));
-        const showings = findUpcomingShowings(filteredDays, now, 3);
+        const showings = findUpcomingShowings(filteredDays, now, 6);
         elements.results.hidden = false;
-
         if (!showings.length) {
-          elements.results.innerHTML = `
-            <div class="summary">
-              <div class="movie-heading">
-                ${movie.poster ? `<img class="poster" src="${escapeHtml(movie.poster)}" alt="بوستر ${escapeHtml(movie.title)}" loading="lazy">` : ""}
-                <div><h2>${escapeHtml(movie.title)}</h2><span class="muted">لا توجد حفلات لاحقة للوقت الحالي ضمن المكان المختار.</span></div>
-              </div>
-            </div>
-            <p class="muted">جرّب توسيع نطاق المسافة، تغيير المناطق، أو اختيار فيلم آخر.</p>`;
-          elements.json.textContent = JSON.stringify({ movie: { id: movie.id, title: movie.title }, searchedAt: now.toISOString(), showings: [] }, null, 2);
+          elements.results.innerHTML = `${movieHeading(movie, "أقرب حفلة بعد الوقت الحالي")}<div class="empty-state">مفيش حفلات لاحقة للوقت الحالي ضمن المكان المختار. جرّب توسيع نطاق المسافة أو تغيير المناطق أو اختيار يوم تاني.</div>`;
           elements.progress.textContent = "لم يتم العثور على ميعاد قادم في البيانات المحفوظة.";
           return;
         }
@@ -325,59 +536,35 @@
         const cinema = nearest.cinema;
         const showtime = nearest.showtime;
         const locationText = [cinema.location?.area?.name, cinema.location?.city?.name].filter(Boolean).join("، ") || "الموقع غير مصنف";
-        const price = showtime.price != null
-          ? `<span class="price">${escapeHtml(showtime.price)} ${escapeHtml(showtime.currency || "EGP")}</span>`
-          : `<span class="unavailable">السعر غير متاح</span>`;
         const alternatives = showings.slice(1);
-
         elements.results.innerHTML = `
-          <div class="summary">
-            <div class="movie-heading">
-              ${movie.poster ? `<img class="poster" src="${escapeHtml(movie.poster)}" alt="بوستر ${escapeHtml(movie.title)}" loading="lazy">` : ""}
-              <div><h2>${escapeHtml(movie.title)}</h2><span class="muted">أقرب حفلة بعد الوقت الحالي</span></div>
+          <div class="results-toolbar">${movieHeading(movie, "أقرب حفلة بعد الوقت الحالي")}<span class="badge">${showings.length} اختيارات قريبة</span></div>
+          <article class="card recommendation">
+            <div class="recommendation-top"><span class="badge badge-gold">✦ أفضل اختيار دلوقتي</span><span class="meta">${escapeHtml(formatWaitingTime(nearest.startsAtTimestamp - now.getTime()))}</span></div>
+            <div class="recommendation-main">
+              <div class="recommendation-copy">
+                <span class="showing-time">${escapeHtml(formatShowingDate(nearest.startsAt))}</span>
+                <h3 class="cinema-name">${escapeHtml(cinema.theater || cinema.name)}</h3>
+                <div class="detail-row"><span>⌖ ${escapeHtml(locationText)}</span>${cinema.distanceKm != null ? `<span class="badge badge-blue">${escapeHtml(formatDistance(cinema.distanceKm))}</span>` : ""}<span>${priceMarkup(showtime)}</span>${showtime.experience ? `<span class="badge">${escapeHtml(showtime.experience)}</span>` : ""}</div>
+                ${cinema.address ? `<span class="meta">${escapeHtml(cinema.address)}</span>` : ""}
+              </div>
+              ${cinema.bookingUrl ? `<a class="btn btn-primary" href="${escapeHtml(cinema.bookingUrl)}" target="_blank" rel="noreferrer">🎟 احجز الآن</a>` : ""}
             </div>
-          </div>
-          <article class="recommendation">
-            <div class="recommendation-label">أفضل ميعاد متاح الآن · ${escapeHtml(formatWaitingTime(nearest.startsAtTimestamp - now.getTime()))}</div>
-            <div class="recommendation-time">${escapeHtml(formatShowingDate(nearest.startsAt))}</div>
-            <h3>${escapeHtml(cinema.theater || cinema.name)}</h3>
-            <div class="recommendation-details">
-              <span class="location">${escapeHtml(locationText)}</span>
-              ${cinema.distanceKm != null ? `<span class="distance">📍 ${escapeHtml(formatDistance(cinema.distanceKm))}</span>` : ""}
-              <span>${price}</span>
-              ${showtime.experience ? `<span>${escapeHtml(showtime.experience)}</span>` : ""}
-            </div>
-            ${cinema.address ? `<p class="muted">${escapeHtml(cinema.address)}</p>` : ""}
-            ${cinema.bookingUrl ? `<p><a href="${escapeHtml(cinema.bookingUrl)}" target="_blank" rel="noreferrer">احجز هذه الحفلة على elCinema</a></p>` : ""}
           </article>
-          ${alternatives.length ? `<div class="alternatives"><h3>أقرب بدائل بعدها</h3>${alternatives.map((showing) => {
-            const alternativePrice = showing.showtime.price != null
-              ? `${escapeHtml(showing.showtime.price)} ${escapeHtml(showing.showtime.currency || "EGP")}`
-              : "السعر غير متاح";
-            return `<div class="alternative"><span><strong>${escapeHtml(showing.cinema.theater || showing.cinema.name)}</strong> · ${escapeHtml(formatShowingDate(showing.startsAt))}</span><span class="muted">${alternativePrice}${showing.cinema.distanceKm != null ? ` · ${escapeHtml(formatDistance(showing.cinema.distanceKm))}` : ""}</span></div>`;
-          }).join("")}</div>` : ""}`;
-
-        elements.json.textContent = JSON.stringify({
-          movie: { id: movie.id, title: movie.title },
-          searchedAt: now.toISOString(),
-          showings: showings.map((showing) => ({
-            startsAt: showing.startsAt,
-            cinema: showing.cinema.theater || showing.cinema.name,
-            distanceKm: showing.cinema.distanceKm,
-            price: showing.showtime.price,
-            currency: showing.showtime.currency,
-            experience: showing.showtime.experience,
-          })),
-        }, null, 2);
-        elements.progress.textContent = `تم حساب أقرب ميعاد من الساعة ${new Intl.DateTimeFormat("ar-EG", { timeStyle: "short", timeZone: "Africa/Cairo" }).format(now)}.`;
+          ${alternatives.length ? `<div><div class="section-heading"><div class="heading-copy"><h3>اختيارات تانية بعدها</h3><span class="meta">مرتبة حسب أقرب ميعاد متاح</span></div></div><div class="alternatives">${alternatives.map((showing) => {
+            const alternativeLocation = [showing.cinema.location?.area?.name, showing.cinema.location?.city?.name].filter(Boolean).join("، ");
+            return `<article class="alternative"><div class="alternative-head"><strong>${escapeHtml(showing.cinema.theater || showing.cinema.name)}</strong><span class="alternative-time">${escapeHtml(formatShowingTime(showing.startsAt))}</span></div><span class="meta">${escapeHtml(alternativeLocation)}${showing.cinema.distanceKm != null ? ` · ${escapeHtml(formatDistance(showing.cinema.distanceKm))}` : ""}</span><span>${priceMarkup(showing.showtime)}${showing.showtime.experience ? ` · <span class="meta">${escapeHtml(showing.showtime.experience)}</span>` : ""}</span></article>`;
+          }).join("")}</div></div>` : ""}
+          <button class="btn" type="button" data-show-date="${escapeHtml(nearest.day)}">اعرض كل مواعيد ${escapeHtml(dateLabel(nearest.day))}</button>`;
+        elements.progress.textContent = `حسبنا أقرب ميعاد من الساعة ${new Intl.DateTimeFormat("ar-EG", { timeStyle: "short", timeZone: "Africa/Cairo" }).format(now)}.`;
       }
 
       function clearUserLocation(render = true) {
         userLocation = null;
         elements.radius.disabled = true;
         elements.clearLocation.hidden = true;
-        elements.locate.textContent = "📍 استخدم موقعي";
-        elements.locationStatus.textContent = "تم إلغاء استخدام الموقع. يمكنك اختيار المحافظة والمناطق يدويًا.";
+        elements.locate.textContent = "⌖ استخدم موقعي";
+        elements.locationStatus.textContent = "تم إلغاء الموقع. اختار المحافظة والمناطق يدويًا.";
         if (render && !elements.results.hidden) renderResults();
       }
 
@@ -386,38 +573,25 @@
           elements.locationStatus.textContent = "المتصفح لا يدعم تحديد الموقع. استخدم اختيار المحافظة والمناطق.";
           return;
         }
-
         elements.locate.disabled = true;
         elements.locate.textContent = "جاري تحديد موقعك…";
         elements.locationStatus.textContent = "اسمح للموقع بالوصول لمكانك عند ظهور رسالة المتصفح.";
         navigator.geolocation.getCurrentPosition((position) => {
-          userLocation = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          };
+          userLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude };
           elements.city.value = "";
           loadAreas();
           elements.radius.disabled = false;
           elements.clearLocation.hidden = false;
           elements.locate.disabled = false;
-          elements.locate.textContent = "📍 تحديث موقعي";
-          const accuracy = Math.round(position.coords.accuracy);
-          elements.locationStatus.textContent = `تم تحديد موقعك بدقة تقريبية ${accuracy} متر. موقعك لم يتم حفظه أو إرساله.`;
-          renderResults();
+          elements.locate.textContent = "⌖ تحديث موقعي";
+          elements.locationStatus.textContent = `تم تحديد موقعك بدقة تقريبية ${Math.round(position.coords.accuracy)} متر. النتائج هتترتب من الأقرب.`;
+          renderNearestShowing();
         }, (error) => {
-          const messages = {
-            1: "تم رفض إذن الموقع. فعّله من إعدادات المتصفح أو استخدم اختيار المناطق.",
-            2: "تعذّر معرفة موقعك حاليًا. جرّب مرة أخرى أو استخدم اختيار المناطق.",
-            3: "استغرق تحديد الموقع وقتًا طويلًا. جرّب مرة أخرى.",
-          };
+          const messages = { 1: "تم رفض إذن الموقع. فعّله من إعدادات المتصفح أو استخدم اختيار المناطق.", 2: "تعذّر معرفة موقعك حاليًا. جرّب مرة تانية.", 3: "تحديد الموقع أخد وقت طويل. جرّب مرة تانية." };
           elements.locate.disabled = false;
-          elements.locate.textContent = "📍 استخدم موقعي";
-          elements.locationStatus.textContent = messages[error.code] || "حدث خطأ أثناء تحديد الموقع.";
-        }, {
-          enableHighAccuracy: false,
-          timeout: 10000,
-          maximumAge: 300000,
-        });
+          elements.locate.textContent = "⌖ استخدم موقعي";
+          elements.locationStatus.textContent = messages[error.code] || "حصل خطأ أثناء تحديد الموقع.";
+        }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
       }
 
       async function loadSnapshot(force = false) {
@@ -426,58 +600,70 @@
         try {
           const suffix = force ? `?v=${Date.now()}` : "";
           const response = await fetch(`./data/snapshot.json${suffix}`, { cache: force ? "reload" : "default" });
-          if (!response.ok) throw new Error(`لم يتم إنشاء ملف البيانات بعد (HTTP ${response.status}).`);
+          if (!response.ok) throw new Error(`ملف البيانات غير متاح (HTTP ${response.status}).`);
           snapshot = await response.json();
           if (!Array.isArray(snapshot.movies) || !snapshot.generatedAt) throw new Error("ملف البيانات غير صالح.");
-
-          elements.movie.innerHTML = snapshot.movies
-            .map((item) => `<option value="${item.id}">${escapeHtml(item.title)}</option>`)
-            .join("");
-          elements.city.innerHTML = `<option value="">كل المحافظات والمدن</option>` + snapshot.locations.cities
-            .map((item) => `<option value="${item.id}">${escapeHtml(item.nameAr || item.nameEn)}</option>`)
-            .join("");
-          elements.movie.disabled = false;
+          selectedMovieId = snapshot.movies[0]?.id || null;
+          elements.city.innerHTML = `<option value="">كل المحافظات والمدن</option>` + snapshot.locations.cities.map((item) => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.nameAr || item.nameEn)}</option>`).join("");
+          elements.movieSearch.disabled = false;
           elements.city.disabled = false;
-          elements.search.disabled = false;
-          elements.nearest.disabled = false;
+          elements.nearest.disabled = !selectedMovieId;
           elements.locate.disabled = false;
           elements.freshness.textContent = `آخر تحديث: ${formatUpdatedAt(snapshot.generatedAt)}`;
           elements.stats.textContent = `${snapshot.stats.movies} فيلم · ${snapshot.stats.cinemas} سينما · ${snapshot.stats.sessions} ميعاد`;
+          renderMovieCards();
           loadDates();
           loadAreas();
-          elements.progress.textContent = "البيانات جاهزة — البحث والفلترة هيظهروا فورًا.";
+          elements.progress.textContent = "البيانات جاهزة — اختار فيلم أو اضغط أقرب ميعاد.";
+          if (selectedMovieId) renderNearestShowing();
         } catch (error) {
           elements.freshness.textContent = "البيانات غير متاحة";
           elements.progress.textContent = `${error.message} شغّل npm run snapshot مرة أولى.`;
+          elements.movieGrid.innerHTML = `<div class="empty-search">تعذّر تحميل الأفلام حاليًا.</div>`;
         } finally {
           elements.reload.disabled = false;
         }
       }
 
-      elements.movie.addEventListener("change", loadDates);
+      elements.movieSearch.addEventListener("input", renderMovieCards);
+      elements.movieGrid.addEventListener("click", (event) => {
+        const card = event.target.closest("[data-movie-id]");
+        if (!card) return;
+        selectedMovieId = card.dataset.movieId;
+        renderMovieCards();
+        loadDates();
+        renderNearestShowing();
+      });
+      elements.dateRow.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-date]");
+        if (!button) return;
+        selectedDate = button.dataset.date;
+        renderDateChips();
+        renderResults();
+      });
       elements.city.addEventListener("change", () => {
         if (userLocation) clearUserLocation(false);
         loadAreas();
       });
-      elements.areaToggle.addEventListener("click", () => {
-        elements.areaMenu.hidden = !elements.areaMenu.hidden;
-      });
+      elements.areaToggle.addEventListener("click", () => { elements.areaMenu.hidden = !elements.areaMenu.hidden; });
       elements.areaMenu.addEventListener("change", (event) => {
         if (!event.target.matches('input[type="checkbox"]')) return;
-        if (event.target.checked) selectedAreaIds.add(event.target.value);
-        else selectedAreaIds.delete(event.target.value);
+        if (event.target.checked) selectedAreaIds.add(event.target.value); else selectedAreaIds.delete(event.target.value);
         updateAreaLabel();
       });
-      document.addEventListener("click", (event) => {
-        if (!event.target.closest(".area-picker")) elements.areaMenu.hidden = true;
+      document.addEventListener("click", (event) => { if (!event.target.closest(".area-picker")) elements.areaMenu.hidden = true; });
+      elements.results.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-show-date]");
+        if (!button) return;
+        selectedDate = button.dataset.showDate;
+        renderDateChips();
+        renderResults();
       });
       elements.search.addEventListener("click", renderResults);
       elements.nearest.addEventListener("click", renderNearestShowing);
       elements.locate.addEventListener("click", locateUser);
       elements.clearLocation.addEventListener("click", () => clearUserLocation());
-      elements.radius.addEventListener("change", () => {
-        if (userLocation) renderResults();
-      });
+      elements.radius.addEventListener("change", () => { if (userLocation) renderNearestShowing(); });
       elements.reload.addEventListener("click", () => loadSnapshot(true));
       updateCurrentTime();
       window.setInterval(updateCurrentTime, 30000);
